@@ -6,7 +6,7 @@ on:
     
 env:
   ACR_NAME: sayhicr
-  IMAGE_NAME: karan/sayhi
+  IMAGE_NAME: frontend
   
 jobs:
   build-and-push:
