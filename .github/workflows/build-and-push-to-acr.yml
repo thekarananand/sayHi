@@ -1,0 +1,35 @@
+name: Build and Push to Azure Container Registry
+
+on:
+  push:
+    branches: [ "main" ]
+    
+env:
+  ACR_NAME: sayhicr
+  IMAGE_NAME: karan/sayhi
+  
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Login to Azure Container Registry
+        run: az acr login --name ${{ env.ACR_NAME }}
+
+      - name: Build and Push Docker image
+        run: |
+          IMAGE_TAG=$(date +%Y-%m-%d-%H-%M)
+          FULL_IMAGE_NAME=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}
+          docker build . --build-arg VER=$IMAGE_TAG --no-cache -t $FULL_IMAGE_NAME:$IMAGE_TAG -t $FULL_IMAGE_NAME:latest
+          docker push $FULL_IMAGE_NAME:$IMAGE_TAG
+          docker push $FULL_IMAGE_NAME:latest
+
+      - name: Logout from Azure
+        run: az logout
